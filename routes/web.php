@@ -61,11 +61,4 @@ Route::middleware(['auth', AdminOnly::class])
         Route::resource('/orders', AdminOrderController::class)->only(['index', 'show', 'destroy']);
     });
 
-use Illuminate\Support\Facades\Artisan;
-
-Route::get('/run-migrate', function () {
-    Artisan::call('migrate', ['--force' => true]);
-    return 'Migrasi berhasil dijalankan!';
-});
-
 require __DIR__.'/auth.php';
