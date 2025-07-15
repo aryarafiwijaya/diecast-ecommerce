@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProductController;
@@ -10,6 +11,19 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Middleware\AdminOnly;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+
+Route::get('/debug-log', function () {
+    $logPath = storage_path('logs/laravel.log');
+
+    if (!File::exists($logPath)) {
+        return 'Log file not found.';
+    }
+
+    $logContent = File::get($logPath);
+
+    // Batasi biar gak terlalu besar
+    return nl2br(substr($logContent, -5000));
+});
 
 // Redirect Root ke Dashboard langsung (baik login atau belum)
 Route::redirect('/', '/dashboard');

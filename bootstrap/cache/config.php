@@ -531,7 +531,7 @@
     'from' => 
     array (
       'address' => 'hello@example.com',
-      'name' => 'Laravel',
+      'name' => '${APP_NAME}',
     ),
     'markdown' => 
     array (
