@@ -11,14 +11,14 @@ use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Middleware\AdminOnly;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 
-// ✅ Redirect Root ke Dashboard langsung (baik login atau belum)
+// Redirect Root ke Dashboard langsung (baik login atau belum)
 Route::redirect('/', '/dashboard');
 
 // Shop User
 Route::get('/shop', [UserProductController::class, 'index'])->name('shop.index');
 Route::get('/shop/{product}', [UserProductController::class, 'show'])->name('shop.show');
 
-// ✅ Dashboard User dengan pengecekan admin
+// Dashboard User dengan pengecekan admin
 Route::get('/dashboard', function () {
     if (auth()->check() && auth()->user()->is_admin) {
         return redirect()->route('admin.dashboard');
@@ -60,13 +60,5 @@ Route::middleware(['auth', AdminOnly::class])
         Route::resource('/products', ProductController::class);
         Route::resource('/orders', AdminOrderController::class)->only(['index', 'show', 'destroy']);
     });
-
-use Illuminate\Support\Facades\Artisan;
-
-Route::get('/run-migrate', function () {
-    Artisan::call('migrate', ['--force' => true]);
-    return 'Migrasi berhasil dijalankan!';
-});
-
 
 require __DIR__.'/auth.php';
