@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,11 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Middleware\AdminOnly;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+
+Route::get('/test-log', function () {
+    Log::error('✅ TEST LOG: Laravel bisa nulis ke log?');
+    return 'Log test written!';
+});
 
 Route::get('/debug-log', function () {
     $logPath = storage_path('logs/laravel.log');
