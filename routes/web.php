@@ -1,9 +1,6 @@
 <?php
 
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\User\ProductController as UserProductController;
 use App\Http\Controllers\CartController;
@@ -13,49 +10,35 @@ use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Middleware\AdminOnly;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 
-// Debug routes
-Route::get('/test-log', function () {
-    Log::error('✅ TEST LOG: Laravel bisa nulis ke log?');
-    return 'Log test written!';
-});
-
-Route::get('/debug-log', function () {
-    $logPath = storage_path('logs/laravel.log');
-    if (!File::exists($logPath)) {
-        return 'Log file not found.';
-    }
-    return nl2br(substr(File::get($logPath), -5000));
-});
-
-// Redirect Root ke Shop
+// Redirect Root
 Route::redirect('/', '/shop');
 
-// Shop User (bebas login)
+// Shop User
 Route::get('/shop', [UserProductController::class, 'index'])->name('shop.index');
 Route::get('/shop/{product}', [UserProductController::class, 'show'])->name('shop.show');
 
-// Dashboard User (login wajib, cek admin)
+// Dashboard User
 Route::get('/dashboard', function () {
     if (auth()->check() && auth()->user()->is_admin) {
         return redirect()->route('admin.dashboard');
     }
-    return view('dashboard');
-})->middleware('auth')->name('dashboard');
 
-// Semua fitur user (login wajib)
+    return view('dashboard');
+})->name('dashboard');
+
+// Fitur User
 Route::middleware(['auth'])->group(function () {
-    // Cart
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
     Route::delete('/cart/{cart}', [CartController::class, 'destroy'])->name('cart.destroy');
     Route::delete('/cart-clear', [CartController::class, 'clear'])->name('cart.clear');
 
-    // Checkout
+    // Halaman Review Sebelum Checkout
     Route::get('/checkout/review', [CartController::class, 'review'])->name('cart.review');
     Route::post('/checkout/review', [CartController::class, 'reviewPost'])->name('cart.review'); 
+
     Route::post('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 
-    // Orders & Profile
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::view('/profile', 'profile')->name('profile');
@@ -74,6 +57,8 @@ Route::middleware(['auth', AdminOnly::class])
     ->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('/products', ProductController::class);
+
+        // ✅ Lengkap dengan index, show, destroy
         Route::resource('/orders', AdminOrderController::class)->only(['index', 'show', 'destroy']);
     });
 
