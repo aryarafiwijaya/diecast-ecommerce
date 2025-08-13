@@ -58,7 +58,6 @@ Route::middleware(['auth', AdminOnly::class])
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('/products', ProductController::class);
 
-        // ✅ Lengkap dengan index, show, destroy
         Route::resource('/orders', AdminOrderController::class)->only(['index', 'show', 'destroy']);
     });
 
