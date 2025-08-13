@@ -47,17 +47,16 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware('auth')->name('dashboard');
 
-// Fitur User
-Route::middleware(['auth'])->group(function () {
-    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
-    Route::delete('/cart/{cart}', [CartController::class, 'destroy'])->name('cart.destroy');
-    Route::delete('/cart-clear', [CartController::class, 'clear'])->name('cart.clear');
+// Fitur User 
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
+Route::delete('/cart/{cart}', [CartController::class, 'destroy'])->name('cart.destroy');
+Route::delete('/cart-clear', [CartController::class, 'clear'])->name('cart.clear');
 
-    // Halaman Review Sebelum Checkout
+// Halaman Review & Checkout (login wajib)
+Route::middleware(['auth'])->group(function () {
     Route::get('/checkout/review', [CartController::class, 'review'])->name('cart.review');
     Route::post('/checkout/review', [CartController::class, 'reviewPost'])->name('cart.review'); 
-
     Route::post('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
@@ -67,6 +66,7 @@ Route::middleware(['auth'])->group(function () {
     // Midtrans Snap Token
     Route::post('/midtrans/token', [CartController::class, 'getMidtransToken'])->name('midtrans.token');
 });
+
 
 // Webhook Midtrans (tanpa auth!)
 Route::post('/midtrans/webhook', [MidtransWebhookController::class, 'handle']);
