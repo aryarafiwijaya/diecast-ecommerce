@@ -13,6 +13,7 @@ use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Middleware\AdminOnly;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 
+// Debug routes
 Route::get('/test-log', function () {
     Log::error('✅ TEST LOG: Laravel bisa nulis ke log?');
     return 'Log test written!';
@@ -20,46 +21,41 @@ Route::get('/test-log', function () {
 
 Route::get('/debug-log', function () {
     $logPath = storage_path('logs/laravel.log');
-
     if (!File::exists($logPath)) {
         return 'Log file not found.';
     }
-
-    $logContent = File::get($logPath);
-
-    // Batasi biar gak terlalu besar
-    return nl2br(substr($logContent, -5000));
+    return nl2br(substr(File::get($logPath), -5000));
 });
 
-// Redirect Root ke Dashboard langsung (baik login atau belum)
-Route::redirect('/', '/dashboard');
+// Redirect Root ke Shop
+Route::redirect('/', '/shop');
 
-// Shop User
+// Shop User (bebas login)
 Route::get('/shop', [UserProductController::class, 'index'])->name('shop.index');
 Route::get('/shop/{product}', [UserProductController::class, 'show'])->name('shop.show');
 
-// Dashboard User dengan pengecekan admin
+// Dashboard User (login wajib, cek admin)
 Route::get('/dashboard', function () {
     if (auth()->check() && auth()->user()->is_admin) {
         return redirect()->route('admin.dashboard');
     }
-
     return view('dashboard');
 })->middleware('auth')->name('dashboard');
 
-// Fitur User
+// Semua fitur user (login wajib)
 Route::middleware(['auth'])->group(function () {
+    // Cart
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
     Route::delete('/cart/{cart}', [CartController::class, 'destroy'])->name('cart.destroy');
     Route::delete('/cart-clear', [CartController::class, 'clear'])->name('cart.clear');
 
-    // Halaman Review Sebelum Checkout
+    // Checkout
     Route::get('/checkout/review', [CartController::class, 'review'])->name('cart.review');
     Route::post('/checkout/review', [CartController::class, 'reviewPost'])->name('cart.review'); 
-
     Route::post('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 
+    // Orders & Profile
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::view('/profile', 'profile')->name('profile');
