@@ -1,6 +1,10 @@
+
 <?php
 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\User\ProductController as UserProductController;
 use App\Http\Controllers\CartController;
@@ -10,21 +14,39 @@ use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Middleware\AdminOnly;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 
-// Redirect Root
-Route::redirect('/', '/shop');
+Route::get('/test-log', function () {
+    Log::error('✅ TEST LOG: Laravel bisa nulis ke log?');
+    return 'Log test written!';
+});
+
+Route::get('/debug-log', function () {
+    $logPath = storage_path('logs/laravel.log');
+
+    if (!File::exists($logPath)) {
+        return 'Log file not found.';
+    }
+
+    $logContent = File::get($logPath);
+
+    // Batasi biar gak terlalu besar
+    return nl2br(substr($logContent, -5000));
+});
+
+// Redirect Root ke Dashboard langsung (baik login atau belum)
+Route::redirect('/', '/dashboard');
 
 // Shop User
 Route::get('/shop', [UserProductController::class, 'index'])->name('shop.index');
 Route::get('/shop/{product}', [UserProductController::class, 'show'])->name('shop.show');
 
-// Dashboard User
+// Dashboard User dengan pengecekan admin
 Route::get('/dashboard', function () {
     if (auth()->check() && auth()->user()->is_admin) {
         return redirect()->route('admin.dashboard');
     }
 
     return view('dashboard');
-})->name('dashboard');
+})->middleware('auth')->name('dashboard');
 
 // Fitur User
 Route::middleware(['auth'])->group(function () {
@@ -57,7 +79,6 @@ Route::middleware(['auth', AdminOnly::class])
     ->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('/products', ProductController::class);
-
         Route::resource('/orders', AdminOrderController::class)->only(['index', 'show', 'destroy']);
     });
 
